@@ -5,7 +5,7 @@ public class MySqlHandler {
 
     private static Connection connect() {
 
-        String url = "jdbc:sqlite:D:\\Documents\\SQLite\\test.db";
+        String url = "jdbc:sqlite:D:\\Dokumente\\SQLite\\test.db";
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -124,8 +124,8 @@ public class MySqlHandler {
     }
 
     public static String[] getHeadlines() {
-        String sql = "SELECT fa_headline FROM faz_articles ORDER BY fa_id DESC LIMIT 5;";
-        String fa_headlines[] = new String[5];
+        String sql = "SELECT fa_headline FROM faz_articles ORDER BY fa_id DESC LIMIT 30;";
+        String[] fa_headlines = new String[30];
 
         try (Connection conn = connect();
              Statement stmt  = conn.createStatement();
@@ -142,6 +142,31 @@ public class MySqlHandler {
         }
 
         return fa_headlines;
+    }
+
+    public static String[] getLinks() {
+        String sql = "SELECT fa_link FROM faz_articles ORDER BY fa_id DESC LIMIT 20;";
+        String[] fa_links = new String[20];
+
+        try (Connection conn = connect();
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)){
+
+            int i = 0;
+            while (rs.next()) {
+                fa_links[i] = rs.getString("fa_link");
+                i++;
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return fa_links;
+    }
+
+    public static String getLastLink() {
+        return getLinks()[0];
     }
 
 }

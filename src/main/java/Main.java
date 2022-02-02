@@ -10,7 +10,7 @@ public class Main {
 //        MySqlHandler.insert();
 //    }
 
-    long delay = 60 * 1000; // delay in milliseconds, here 60 seconds
+    long delay = 5 * 60 * 1000; // delay in milliseconds, here 5 min (5 min * 60 sec * 1000 milSec)
     Main.LoopTask task = new Main.LoopTask();
     Timer timer = new Timer("TaskName");
 
@@ -24,7 +24,6 @@ public class Main {
     private class LoopTask extends TimerTask {
         public void run() {
             WebHandler.runPgm();
-            MySqlHandler.insert();
         }
     }
 

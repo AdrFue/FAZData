@@ -9,6 +9,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import java.sql.Time;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +34,7 @@ public class WebHandler {
     public static void runPgm() {
 
         // Webdriver
-        System.setProperty("webdriver.chrome.driver",  "res/chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver", "res/chromedriver.exe");
         ChromeOptions co = new ChromeOptions();
         co.setHeadless(true);
         driver = new ChromeDriver(co);
@@ -42,21 +43,38 @@ public class WebHandler {
         driver.get("https://www.faz.net/faz-live");
         clickPopupFrame();
         WebElement ticker = driver.findElement(By.id("FAZContentLeftInner"));
-        link = ticker.findElement(By.tagName("a")).getAttribute("href");
+        List<WebElement> tickerLinks = ticker.findElements(By.tagName("a"));
+
+        String[] links = new String[20];
+        for (int i = 19; i >= 0; i--) {
+            links[i] = tickerLinks.get(i*2).getAttribute("href");
+        }
+
+        for (int i = 0; i < 20; i++) {
+            driver.get("https://www.faz.net/faz-live");
+            clickPopupFrame();
+            link = links[i];
+
+            crawlData(link);
+            MySqlHandler.insert();
+        }
+
+        driver.quit();
+    }
+
+    public static void crawlData(String link) {
 
         driver.get(link);
         clickPopupFrame();
         System.out.println("Looking at " + link);
 
         ressorts = new ArrayList<>();
-        if (link.indexOf("agenturmeldungen") != -1) {
+        if (link.contains("agenturmeldungen")) {
             ressorts.add("agenturmeldungen");
         } else {
             String linkParts = link.substring(28, link.lastIndexOf("/"));
             String[] linkSplitts = linkParts.split("/");
-            for (String ls : linkSplitts) {
-                ressorts.add(ls);
-            }
+            Collections.addAll(ressorts, linkSplitts);
         }
 
         // Header
@@ -111,8 +129,8 @@ public class WebHandler {
             if (driver.findElements(By.className("atc-TextParagraph")).size() != 0) {
                 var paras = driver.findElements(By.className("atc-TextParagraph"));
                 int paraSize = paras.size();
-                for (int i = 0; i < paras.size(); i++) {
-                    text += "\n" + paras.get(i).getText();
+                for (WebElement para : paras) {
+                    text += "\n" + para.getText();
                 }
             }
 
@@ -149,8 +167,6 @@ public class WebHandler {
                 themes.add(rawThemes.get(i).getText());
             }
         }
-
-        driver.quit();
     }
 
     // clicking popup
